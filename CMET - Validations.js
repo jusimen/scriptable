@@ -155,8 +155,8 @@ async function main() {
 			timestamp: validationsData?.timestamp_resource,
 			title:
 				type === 'cm'
-					? `Carris Metropolitana`
-					: `Area ${type.substring(1)}`,
+					? `💳 Carris Metropolitana`
+					: `💳 Area ${type.substring(1)}`,
 			subtitle: `Passageiros transportados hoje, até agora`,
 			valuePrimary: validationsParsed.primary_value_string,
 			valueSecondary: validationsParsed.secondary_value_string,
