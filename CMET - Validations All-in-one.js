@@ -5,22 +5,22 @@
 const settings = Object.freeze({
 	colors: {
 		blue: {
-			100: Color.dynamic(new Color('#0096ff'), new Color('#0096ff')),
+			100: Color.dynamic(new Color('#0096ff '), new Color('#0096ff')),
 			200: Color.dynamic(new Color('#27529a'), new Color('#27529a')),
-			300: Color.dynamic(new Color('#002350'), new Color('#002350')),
+			300: Color.dynamic(new Color('#d1ebfd '), new Color('#002350')),
 		},
 		green: {
 			100: Color.dynamic(new Color('#00af3c'), new Color('#00af3c')),
 			200: Color.dynamic(new Color('#11690b'), new Color('#11690b')),
-			300: Color.dynamic(new Color('#23321e'), new Color('#23321e')),
+			300: Color.dynamic(new Color('#c4f6d5 '), new Color('#23321e')),
 		},
 		orange: {
 			100: Color.dynamic(new Color('#ff5f14'), new Color('#ff5f14')),
 			200: Color.dynamic(new Color('#9a6e0c'), new Color('#9a6e0c')),
-			300: Color.dynamic(new Color('#3e3a0b'), new Color('#3e3a0b')),
+			300: Color.dynamic(new Color('#f9d9cb '), new Color('#3e3a0b')),
 		},
 		text: {
-			300: Color.dynamic(new Color('#000'), new Color('#fff')),
+			300: Color.dynamic(new Color('#3a3a3a'), new Color('#fff')),
 			200: Color.dynamic(new Color(' #3a3a3a '), new Color('#adadb0')),
 		},
 		background: {
@@ -42,6 +42,7 @@ const settings = Object.freeze({
 // Widget
 const widget = new ListWidget();
 widget.backgroundColor = settings.colors.background[100];
+widget.url = 'scriptable:///run/CMET%20-%20Validations%20All-in-one';
 
 // Fetches Data
 async function fetchData(url) {
@@ -153,7 +154,7 @@ async function main() {
 	Card({
 		sentiment: validationsParsed[0].secondary_value < 1 ? 'normal' : 'good',
 		timestamp: validationsData?.timestamp_resource,
-		size: new Size(322, 70),
+		size: new Size(322, 90),
 		title: `💳 Carris Metropolitana`,
 		valuePrimary: validationsParsed[0].primary_value_string,
 		valueSecondary: validationsParsed[0].secondary_value_string,
