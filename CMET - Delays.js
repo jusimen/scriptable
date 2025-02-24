@@ -29,7 +29,7 @@ const settings = Object.freeze({
 		},
 	},
 	font: {
-		title: Font.semiboldSystemFont(20),
+		title: Font.semiboldSystemFont(36),
 		subtitle: Font.systemFont(16),
 		text: Font.systemFont(12),
 	},
@@ -93,7 +93,7 @@ function Card({
 
 	// Value Primary
 	const horizontalStack = stack.addStack();
-	size.width >= 300
+	size.width >= 100
 		? horizontalStack.layoutHorizontally()
 		: horizontalStack.layoutVertically();
 	horizontalStack.bottomAlignContent();
@@ -106,7 +106,7 @@ function Card({
 	const valueSecondaryStack = horizontalStack.addStack();
 	valueSecondaryStack.layoutVertically();
 	valueSecondaryStack.bottomAlignContent();
-	size.width >= 300
+	size.width >= 100
 		? valueSecondaryStack.setPadding(0, 5, 0, 0)
 		: valueSecondaryStack.setPadding(0, 0, 0, 5);
 
@@ -127,25 +127,30 @@ async function main() {
 
 	const types = ['cm', '41', '42', '43', '44'];
 
-	const formattedSeconds =
-		(validationsData.data._cm_average_delay_minutes * 60) % 60;
-	const formattedMinutes =
-		validationsData.data._cm_average_delay_minutes - formattedSeconds / 60;
-
 	const validationsParsed = types.map((type) => {
 		return {
 			primary_value:
-				validationsData.data[`_${type}_average_delay_minutes`],
+				validationsData.data[
+					`_${type}_delayed_for_more_than_five_minutes_count`
+				] / validationsData.data[`_${type}_total_until_now_count`],
 			primary_value_string: `${Intl.NumberFormat('pt-PT', {
 				maximumFractionDigits: 0,
-			}).format(formattedMinutes)}m ${Intl.NumberFormat('pt-PT', {
-				maximumFractionDigits: 0,
-			}).format(formattedSeconds)}s`,
+			}).format(
+				(validationsData.data[
+					`_${type}_delayed_for_more_than_five_minutes_count`
+				] /
+					validationsData.data[`_${type}_total_until_now_count`]) *
+					100
+			)}%`,
 			secondary_value:
-				validationsData.data[`_${type}_average_delay_minutes`],
-			secondary_value_string: `${Intl.NumberFormat('pt-PT').format(
-				validationsData.data[`_${type}_total_until_now_count`]
-			)}`,
+				validationsData.data[
+					`_${type}_delayed_for_more_than_five_minutes_count`
+				],
+			secondary_value_string: `(${Intl.NumberFormat('pt-PT').format(
+				validationsData.data[
+					`_${type}_delayed_for_more_than_five_minutes_count`
+				]
+			)})`,
 		};
 	});
 
@@ -155,10 +160,10 @@ async function main() {
 
 	// Carris Metropolitana
 	Card({
-		sentiment: validationsParsed[0].secondary_value < 1 ? 'normal' : 'good',
+		sentiment: validationsParsed[0].primary_value > 0.095 ? 'bad' : 'good',
 		timestamp: validationsData?.timestamp_resource,
 		size: new Size(322, 90),
-		title: `⏱️ CM - Atraso médio do total de viagens`,
+		title: `⏱️ CM - Viagens atrasadas > 5 min`,
 		valuePrimary: validationsParsed[0].primary_value_string,
 		valueSecondary: validationsParsed[0].secondary_value_string,
 	});
@@ -171,7 +176,7 @@ async function main() {
 
 	validationsParsed.slice(1, 3).forEach((validation, index) => {
 		Card({
-			sentiment: validation.secondary_value < 1 ? 'normal' : 'good',
+			sentiment: validation.primary_value > 0.095 ? 'bad' : 'good',
 			timestamp: validationsData?.timestamp_resource,
 			size: new Size(310 / 2, 90),
 			title: `⏱️ Area ${types[index + 1].substring(1)}`,
@@ -189,7 +194,7 @@ async function main() {
 
 	validationsParsed.slice(3, 5).forEach((validation, index) => {
 		Card({
-			sentiment: validation.secondary_value < 1 ? 'normal' : 'good',
+			sentiment: validation.primary_value > 0.095 ? 'bad' : 'good',
 			timestamp: validationsData?.timestamp_resource,
 			size: new Size(310 / 2, 90),
 			title: `⏱️ Area ${types[index + 3].substring(1)}`,
