@@ -5,22 +5,22 @@
 const settings = Object.freeze({
 	colors: {
 		blue: {
-			100: Color.dynamic(new Color('#0096ff '), new Color('#0096ff')),
+			100: Color.dynamic(new Color('#0096ff'), new Color('#0096ff')),
 			200: Color.dynamic(new Color('#27529a'), new Color('#27529a')),
-			300: Color.dynamic(new Color('#d1ebfd '), new Color('#002350')),
+			300: Color.dynamic(new Color('#002350'), new Color('#002350')),
 		},
 		green: {
 			100: Color.dynamic(new Color('#00af3c'), new Color('#00af3c')),
 			200: Color.dynamic(new Color('#11690b'), new Color('#11690b')),
-			300: Color.dynamic(new Color('#c4f6d5 '), new Color('#23321e')),
+			300: Color.dynamic(new Color('#23321e'), new Color('#23321e')),
 		},
 		orange: {
 			100: Color.dynamic(new Color('#ff5f14'), new Color('#ff5f14')),
 			200: Color.dynamic(new Color('#9a6e0c'), new Color('#9a6e0c')),
-			300: Color.dynamic(new Color('#f9d9cb '), new Color('#3e3a0b')),
+			300: Color.dynamic(new Color('#3e3a0b'), new Color('#3e3a0b')),
 		},
 		text: {
-			300: Color.dynamic(new Color('#3a3a3a'), new Color('#fff')),
+			300: Color.dynamic(new Color('#000'), new Color('#fff')),
 			200: Color.dynamic(new Color(' #3a3a3a '), new Color('#adadb0')),
 		},
 		background: {
@@ -29,9 +29,9 @@ const settings = Object.freeze({
 		},
 	},
 	font: {
-		title: Font.semiboldSystemFont(20),
-		subtitle: Font.systemFont(16),
-		text: Font.systemFont(12),
+		title: Font.semiboldSystemFont(48),
+		subtitle: Font.systemFont(22),
+		text: Font.systemFont(16),
 	},
 	resources: {
 		validations:
@@ -42,7 +42,6 @@ const settings = Object.freeze({
 // Widget
 const widget = new ListWidget();
 widget.backgroundColor = settings.colors.background[100];
-widget.url = 'scriptable:///run/CMET%20-%20Validations%20All-in-one';
 
 // Fetches Data
 async function fetchData(url) {
@@ -61,10 +60,11 @@ const normalizeTimestamp = (timestamp) => {
 function Card({
 	sentiment,
 	title,
+	timestamp,
+	subtitle,
 	valuePrimary,
 	valueSecondary,
 	parentStack = widget,
-	size = new Size(330 / 2, 70),
 }) {
 	const sentimentColor =
 		sentiment === 'good'
@@ -75,9 +75,9 @@ function Card({
 
 	//
 	const stack = parentStack.addStack();
-	stack.size = size;
+	stack.size = new Size(330, 155);
 	stack.cornerRadius = 20;
-	stack.borderWidth = 5;
+	stack.borderWidth = 10;
 	stack.borderColor = sentimentColor[100];
 	stack.backgroundColor = sentimentColor[300];
 	const padding = 15;
@@ -89,13 +89,14 @@ function Card({
 	titleText.font = settings.font.subtitle;
 	titleText.textColor = settings.colors.text[100];
 
-	stack.addSpacer(10);
+	// Subtitle
+	const subtitleText = stack.addText(subtitle);
+	subtitleText.font = settings.font.text;
+	subtitleText.textColor = settings.colors.text[200];
 
 	// Value Primary
 	const horizontalStack = stack.addStack();
-	size.width >= 300
-		? horizontalStack.layoutHorizontally()
-		: horizontalStack.layoutVertically();
+	horizontalStack.layoutHorizontally();
 	horizontalStack.bottomAlignContent();
 
 	const valuePrimaryText = horizontalStack.addText(valuePrimary);
@@ -104,15 +105,17 @@ function Card({
 
 	// Value Secondary
 	const valueSecondaryStack = horizontalStack.addStack();
-	valueSecondaryStack.layoutVertically();
-	valueSecondaryStack.bottomAlignContent();
-	size.width >= 300
-		? valueSecondaryStack.setPadding(0, 5, 0, 0)
-		: valueSecondaryStack.setPadding(0, 0, 0, 5);
+	valueSecondaryStack.setPadding(0, 5, 5, 0);
 
 	const valueSecondaryText = valueSecondaryStack.addText(valueSecondary);
 	valueSecondaryText.font = settings.font.subtitle;
 	valueSecondaryText.textColor = sentimentColor[200];
+
+	stack.addSpacer();
+
+	const updatedAtText = stack.addText(normalizeTimestamp(timestamp));
+	updatedAtText.font = settings.font.text;
+	updatedAtText.textColor = sentimentColor[200];
 }
 
 async function main() {
@@ -121,14 +124,13 @@ async function main() {
 	//
 	// A. Fetch data
 	const validationsData = await fetchData(settings.resources.validations);
+	const type = (args.widgetParameter ?? 'CM').toLowerCase();
 
 	//
 	// B. Transform data
 
-	const types = ['cm', '41', '42', '43', '44'];
-
-	const validationsParsed = types.map((type) => {
-		return {
+	try {
+		const validationsParsed = {
 			primary_value: validationsData.data[`_${type}_today_valid_count`],
 			primary_value_string:
 				validationsData.data[
@@ -144,73 +146,32 @@ async function main() {
 				).toFixed(2)
 			)}%`,
 		};
-	});
 
-	//
-	// C. Render
-	widget.spacing = 10;
-
-	// Carris Metropolitana
-	Card({
-		sentiment: validationsParsed[0].secondary_value < 1 ? 'normal' : 'good',
-		timestamp: validationsData?.timestamp_resource,
-		size: new Size(322, 90),
-		title: `💳 CM - Passageiros transportados`,
-		valuePrimary: validationsParsed[0].primary_value_string,
-		valueSecondary: validationsParsed[0].secondary_value_string,
-	});
-
-	// Areas 1 & 2
-	const horizontalStack = widget.addStack();
-	horizontalStack.layoutHorizontally();
-	horizontalStack.bottomAlignContent();
-	horizontalStack.spacing = 10;
-
-	validationsParsed.slice(1, 3).forEach((validation, index) => {
+		//
+		// C. Render
 		Card({
-			sentiment: validation.secondary_value < 1 ? 'normal' : 'good',
+			sentiment:
+				validationsParsed.secondary_value < 1 ? 'normal' : 'good',
 			timestamp: validationsData?.timestamp_resource,
-			size: new Size(310 / 2, 90),
-			title: `💳 Area ${types[index + 1].substring(1)}`,
-			valuePrimary: validation.primary_value_string,
-			valueSecondary: validation.secondary_value_string,
-			parentStack: horizontalStack,
+			title:
+				type === 'cm'
+					? `💳 Carris Metropolitana`
+					: `💳 Area ${type.substring(1)}`,
+			subtitle: `Passageiros transportados hoje, até agora`,
+			valuePrimary: validationsParsed.primary_value_string,
+			valueSecondary: validationsParsed.secondary_value_string,
 		});
-	});
-
-	// Areas 3 & 4
-	const horizontalStack2 = widget.addStack();
-	horizontalStack2.layoutHorizontally();
-	horizontalStack2.bottomAlignContent();
-	horizontalStack2.spacing = 10;
-
-	validationsParsed.slice(3, 5).forEach((validation, index) => {
+	} catch (error) {
 		Card({
-			sentiment: validation.secondary_value < 1 ? 'normal' : 'good',
+			sentiment: 'bad',
 			timestamp: validationsData?.timestamp_resource,
-			size: new Size(310 / 2, 90),
-			title: `💳 Area ${types[index + 3].substring(1)}`,
-			valuePrimary: validation.primary_value_string,
-			valueSecondary: validation.secondary_value_string,
-			parentStack: horizontalStack2,
+			title: `O argumento "${type}" não é válido.`,
+			subtitle: '',
+			valuePrimary: 'ERRO',
+			valueSecondary: '',
 		});
-	});
-
-	//
-	// D. Add Spacer
-
-	//
-	// E. Add Footer
-	const footerStack = widget.addStack();
-	footerStack.layoutHorizontally();
-	footerStack.bottomAlignContent();
-	footerStack.setPadding(0, 10, 0, 0);
-
-	const updatedAtText = footerStack.addText(
-		normalizeTimestamp(validationsData?.timestamp_resource)
-	);
-	updatedAtText.font = settings.font.subtitle;
-	updatedAtText.textColor = settings.colors.text[200];
+		return;
+	}
 }
 
 // MAIN
@@ -219,4 +180,4 @@ await main();
 
 Script.setWidget(widget);
 Script.complete();
-widget.presentLarge();
+widget.presentMedium();

@@ -1,6 +1,6 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
-// icon-color: yellow; icon-glyph: credit-card;
+// icon-color: yellow; icon-glyph: ruler-horizontal;
 
 const settings = Object.freeze({
 	colors: {
