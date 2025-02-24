@@ -164,7 +164,7 @@ async function main() {
 		sentiment: validationsParsed[0].secondary_value < 1 ? 'normal' : 'good',
 		timestamp: validationsData?.timestamp_resource,
 		size: new Size(322, 90),
-		title: `🚫 Carris Metropolitana`,
+		title: `🚫 CM - Viagens não executadas hoje`,
 		valuePrimary: validationsParsed[0].primary_value_string,
 		valueSecondary: validationsParsed[0].secondary_value_string,
 	});
