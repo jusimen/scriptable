@@ -161,7 +161,8 @@ async function main() {
 
 	// Carris Metropolitana
 	Card({
-		sentiment: validationsParsed[0].secondary_value < 1 ? 'normal' : 'good',
+		sentiment:
+			validationsParsed[0].secondary_value > 0.05 ? 'normal' : 'good',
 		timestamp: validationsData?.timestamp_resource,
 		size: new Size(322, 90),
 		title: `🚫 CM - Viagens não executadas hoje`,
@@ -177,7 +178,7 @@ async function main() {
 
 	validationsParsed.slice(1, 3).forEach((validation, index) => {
 		Card({
-			sentiment: validation.secondary_value < 1 ? 'normal' : 'good',
+			sentiment: validation.secondary_value > 0.05 ? 'normal' : 'good',
 			timestamp: validationsData?.timestamp_resource,
 			size: new Size(310 / 2, 90),
 			title: `🚫 Area ${types[index + 1].substring(1)}`,
@@ -195,7 +196,7 @@ async function main() {
 
 	validationsParsed.slice(3, 5).forEach((validation, index) => {
 		Card({
-			sentiment: validation.secondary_value < 1 ? 'normal' : 'good',
+			sentiment: validation.secondary_value > 0.05 ? 'normal' : 'good',
 			timestamp: validationsData?.timestamp_resource,
 			size: new Size(310 / 2, 90),
 			title: `🚫 Area ${types[index + 3].substring(1)}`,
